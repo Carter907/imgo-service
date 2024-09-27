@@ -1,6 +1,6 @@
 module gin-img-processer
 
-go 1.23.1
+go 1.23
 
 require (
 	github.com/bytedance/sonic v1.12.3 // indirect

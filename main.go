@@ -1,21 +1,13 @@
 package main
 
 import (
-	auth "gin-img-processer/auth"
+	"gin-img-processer/auth"
+	"gin-img-processer/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
-
-// User represents a user in our system
-type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// For simplicity, we'll use an in-memory store. In a real application, you'd use a database.
-var users = make(map[string]string)
 
 func main() {
 	r := gin.Default()
@@ -39,14 +31,14 @@ func showSignupForm(c *gin.Context) {
 }
 
 func signUp(c *gin.Context) {
-	var user User
+	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Check if user already exists
-	if _, exists := users[user.Username]; exists {
+	if _, exists := model.Users[user.Username]; exists {
 		c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
 		return
 	}
@@ -59,20 +51,20 @@ func signUp(c *gin.Context) {
 	}
 
 	// Store the user
-	users[user.Username] = string(hashedPassword)
+	model.Users[user.Username] = string(hashedPassword)
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
 }
 
 func logIn(c *gin.Context) {
-	var user User
+	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Retrieve the hashed password
-	storedPassword, exists := users[user.Username]
+	storedPassword, exists := model.Users[user.Username]
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
